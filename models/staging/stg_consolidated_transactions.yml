@@ -4,11 +4,107 @@ models:
   - name: stg_consolidated_transactions
     description: >
       Sample staging model for the denormalized landing extract.
-      Next step for candidates: normalize into dims + fact (this model alone is not the end state).
+      Standardizes source column names and data types while preserving
+      source records for downstream quality checks and normalization.
+      This model alone is not the end state; downstream models normalize
+      the data into dimensions and facts.
+
     columns:
       - name: transaction_id
-        description: Business transaction id (not unique in the raw extract).
+        description: >
+          Business transaction ID. Not unique in the raw extract;
+          repeated IDs must be investigated before deduplication.
         tests:
           - not_null
+
+      - name: transaction_month
+        description: >
+          Transaction date from the source. Currently named
+          transaction_month in the staging SQL, although it represents
+          a date rather than a month-level value.
+        tests:
+          - not_null
+
       - name: quantity
-        description: May be negative for returns.
+        description: >
+          Signed transaction quantity. May be negative for returns
+          or adjustments; negative values are not automatically invalid.
+        tests:
+          - not_null
+
+      - name: unit_price
+        description: >
+          Source unit selling price. Used as an input to sales
+          calculations; validate its relationship to other price fields.
+        tests:
+          - not_null
+
+      - name: product_id
+        description: >
+          Source product identifier. Missing or unknown product keys
+          require investigation before establishing fact-to-dimension
+          relationships.
+
+      - name: store_id
+        description: >
+          Source store identifier. Missing or unknown store keys
+          require investigation before establishing fact-to-dimension
+          relationships.
+
+      - name: unit_cost
+        description: >
+          Source unit cost field. Retained for comparison with
+          standard_unit_cost and landed_unit_cost.
+
+      - name: standard_unit_cost
+        description: >
+          Standard unit cost used for the primary budget-based
+          profitability measure, subject to validation of its grain.
+
+      - name: landed_unit_cost
+        description: >
+          Landed unit cost representing actual acquisition cost,
+          subject to validation of its grain and completeness.
+
+      - name: pack_size
+        description: >
+          Units per pack or case. Validate cost grain before applying
+          any pack-size conversion.
+
+      - name: product_name_on_transaction
+        description: >
+          Product name recorded on the transaction. May disagree
+          with the catalog name.
+
+      - name: product_name_catalog
+        description: >
+          Catalog product name. May disagree with the transaction name.
+
+      - name: product_category
+        description: >
+          Source product category, to be checked for consistency
+          across records sharing a product identifier.
+
+      - name: store_name
+        description: >
+          Source store name, to be checked for consistency
+          across records sharing a store identifier.
+
+      - name: state_code
+        description: Source state code associated with the store.
+
+      - name: region_name
+        description: >
+          Source region name. May conflict across records for the
+          same store and requires documented resolution downstream.
+
+      - name: source_system
+        description: >
+          Source-system lineage metadata. Useful when investigating
+          repeated transaction IDs and conflicting record versions.
+
+      - name: ingested_at
+        description: >
+          Source ingestion metadata. The current staging SQL casts
+          this field to a date; preserve timestamp precision if present
+          when updating the staging model.
