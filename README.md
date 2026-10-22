@@ -4,6 +4,8 @@ Timed take-home for analytics engineer candidates. You will **normalize** a deno
 
 **Start here:** [ASSIGNMENT.md](./ASSIGNMENT.md)
 
+**Presentation:** [RSK assessment task by Alex Shepovsky](https://docs.google.com/presentation/d/16qH8cwcPwz8q14hAFASPLalEwyrRZD1VhUMoSWumcV0/edit?usp=sharing)
+
 ---
 
 ## Prerequisites
