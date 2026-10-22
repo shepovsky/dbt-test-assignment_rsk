@@ -27,3 +27,4 @@ output/
 
 # Large original workbook (CSVs in data/raw are the source of truth)
 reference/Store transactions.xlsx
+dbt_internal_packages/
